@@ -134,6 +134,16 @@ Valid types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`
 
 Configuration lives in `.pre-commit-config.yaml` at the repo root.
 
+### 5.4 CI Pipeline (GitHub Actions)
+
+Runs automatically on every push and PR to `main` and `dev`.
+
+**What it checks:**
+- `ruff check` — lint
+- `ruff format --check` — formatting
+- `pytest` — test suite
+
+Configuration lives in `.github/workflows/ci.yml`.
 
 ---
 
