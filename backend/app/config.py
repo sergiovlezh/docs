@@ -1,9 +1,11 @@
 from zoneinfo import ZoneInfo
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file="../.env")
+
     database_url: str = "sqlite+aiosqlite:///./docs.db"
     debug: bool = False
     timezone: str = "UTC"
@@ -11,9 +13,6 @@ class Settings(BaseSettings):
     @property
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.timezone)
-
-    class Config:
-        env_file = "../.env"
 
 
 settings = Settings()
