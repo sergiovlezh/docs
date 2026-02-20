@@ -1,15 +1,17 @@
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
 from alembic.config import Config
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from fastapi.testclient import TestClient
+from sqlalchemy import Engine, StaticPool, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from alembic import command
-from app.database import get_db
+from app.database import Base, get_db
 from app.main import app
 
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_DATABASE_URL = "sqlite:///:memory:"
 
 
 def run_migrations(connection):
@@ -19,31 +21,40 @@ def run_migrations(connection):
     command.upgrade(alembic_cfg, "head")
 
 
-@pytest.fixture
-async def db_session():
-    engine = create_async_engine(TEST_DATABASE_URL)
+@pytest.fixture(scope="session")
+def db_engine() -> Generator[Engine]:
+    engine = create_engine(
+        TEST_DATABASE_URL,
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
 
-    async with engine.begin() as conn:
-        await conn.run_sync(run_migrations)
+    with engine.begin() as connection:
+        run_migrations(connection)
 
-    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+    yield engine
 
-    async with session_factory() as session:
+    Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(scope="function")
+def db_session(db_engine: Engine) -> Generator[Session]:
+    TestingSessionLocal = sessionmaker(
+        autocommit=False, autoflush=False, bind=db_engine
+    )
+
+    with TestingSessionLocal() as session:
         yield session
 
-    await engine.dispose()
 
-
-@pytest.fixture
-async def client(db_session: AsyncSession):
-    async def override_get_db():
+@pytest.fixture(scope="function")
+def client(db_session):
+    def override_get_db():
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
-        yield ac
+    with TestClient(app) as client:
+        yield client
 
     app.dependency_overrides.clear()
