@@ -5,7 +5,7 @@ import pytest
 from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import Engine, StaticPool, create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 
 from alembic import command
 from app.database import Base, get_db
@@ -39,12 +39,15 @@ def db_engine() -> Generator[Engine]:
 
 @pytest.fixture(scope="function")
 def db_session(db_engine: Engine) -> Generator[Session]:
-    TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=db_engine
-    )
+    connection = db_engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
 
-    with TestingSessionLocal() as session:
-        yield session
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 
 @pytest.fixture(scope="function")
