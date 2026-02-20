@@ -18,6 +18,9 @@ coverage.xml
 .hypothesis/
 .tox/
 
+# Lint
+.ruff_cache/
+
 # Node
 node_modules/
 
