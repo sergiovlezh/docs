@@ -82,6 +82,7 @@ class UserService:
 
         Raises:
             NoResultFound: If no user with the given ID exists.
+            IntegrityError: If an user with the same email or username already exists.
         """
         user = self.get_user(user_id)
 
