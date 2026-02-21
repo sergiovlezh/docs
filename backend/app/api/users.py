@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
 from app.api.dependencies import user_svc_dep
+from app.auth import hash_password
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter(
@@ -30,7 +31,7 @@ def create_user(user: UserCreate, service: user_svc_dep):
         return service.create_user(
             email=user.email,
             username=user.username,
-            hashed_password=user.password,
+            hashed_password=hash_password(user.password),
         )
     except IntegrityError as ieex:
         print(ieex)
