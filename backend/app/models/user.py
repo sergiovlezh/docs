@@ -22,6 +22,9 @@ class User(Base):
     )
 
     profile: Mapped["UserProfile"] = relationship(back_populates="user", uselist=False)
+    tokens: Mapped[list["UserToken"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserProfile(Base):
@@ -39,3 +42,16 @@ class UserProfile(Base):
     )
 
     user: Mapped["User"] = relationship(back_populates="profile")
+
+
+class UserToken(Base):
+    __tablename__ = "user_tokens"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    token: Mapped[str] = mapped_column(String(36), unique=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
+
+    user: Mapped["User"] = relationship(back_populates="tokens")
