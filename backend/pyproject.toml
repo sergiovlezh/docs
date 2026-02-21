@@ -1,0 +1,30 @@
+[project]
+name = "docs-backend"
+version = "0.1.0"
+description = "Document manager backend — Docs API"
+readme = "README.md"
+requires-python = ">=3.13"
+
+dependencies = [
+    "alembic>=1.18.4",
+    "fastapi[standard]>=0.129.0",
+    "pydantic-settings>=2.13.0",
+    "sqlalchemy>=2.0.46",
+]
+
+[dependency-groups]
+dev = ["httpx>=0.28.1", "pytest>=9.0.2", "ruff>=0.15.1"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

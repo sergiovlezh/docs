@@ -18,6 +18,9 @@ coverage.xml
 .hypothesis/
 .tox/
 
+# Lint
+.ruff_cache/
+
 # Node
 node_modules/
 
@@ -41,3 +44,7 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# DB
+*.db
+*.sqlite

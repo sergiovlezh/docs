@@ -19,7 +19,7 @@
     ],
 
     // Use 'postCreateCommand' to run commands after the container is created.
-    "postCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+    "postCreateCommand": ".devcontainer/post-create.sh",
 
     // Configure tool-specific properties.
     "customizations": {
@@ -34,6 +34,7 @@
                 "bradlc.vscode-tailwindcss"
             ],
             "settings": {
+                "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
                 "[python]": {
                     "editor.defaultFormatter": "charliermarsh.ruff",
                     "editor.formatOnSave": true,

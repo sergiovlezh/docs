@@ -1,4 +1,4 @@
-# Project Instructions — Docs (Document Manager)
+# Project Instructions - Docs (Document Manager)
 
 > Stack: FastAPI (uv) · React + Vite + TypeScript · SQLite · Docker · Devcontainers · Monorepo
 
@@ -38,7 +38,7 @@ docs/
 
 ---
 
-## 3. Backend — FastAPI + uv
+## 3. Backend - FastAPI + uv
 
 ### 3.1 Dependency management with uv
 
@@ -67,7 +67,7 @@ A router **never** accesses the database directly. That is the service's respons
 - Request and response schemas must be separate (e.g. `DocumentCreate` vs `DocumentResponse`).
 - IDs are always included in response schemas.
 
-### 3.4 Database — SQLAlchemy + Alembic
+### 3.4 Database - SQLAlchemy + Alembic
 
 SQLAlchemy is used with async sessions. SQLite is used in development; the connection URL is configured via environment variable to make future migration to PostgreSQL straightforward.
 
@@ -81,7 +81,7 @@ For the MVP, basic authentication is implemented via a simple username and passw
 
 ---
 
-## 4. Frontend — React + Vite + TypeScript
+## 4. Frontend - React + Vite + TypeScript
 
 ### 4.1 Conventions
 
@@ -100,7 +100,7 @@ Do not mix fetch logic inside components. Use custom hooks in `src/hooks/` to en
 
 - `pages/` contains route-level components (one file per page).
 - `components/` contains reusable components, organized into subfolders as they grow.
-- Pages orchestrate hooks and compose components — they do not contain business logic directly.
+- Pages orchestrate hooks and compose components - they do not contain business logic directly.
 
 ---
 
@@ -118,7 +118,32 @@ Do not mix fetch logic inside components. Use custom hooks in `src/hooks/` to en
 
 ### 5.3 Pre-commit hooks
 
-Hooks run automatically before each commit to enforce minimum quality standards (Ruff | Prettier + Conventional Commit message).
+Pre-commit hooks run automatically before each commit. Every developer must install them once after cloning:
+```bash
+pre-commit install
+pre-commit install --hook-type commit-msg
+```
+
+**Hooks configured:**
+- `ruff check --fix`: lints and auto-fixes Python code
+- `ruff format`: formats Python code
+- `conventional-pre-commit`: enforces commit message format
+
+**Commit message format:** `type: description`
+Valid types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`
+
+Configuration lives in `.pre-commit-config.yaml` at the repo root.
+
+### 5.4 CI Pipeline (GitHub Actions)
+
+Runs automatically on every push and PR to `main` and `dev`.
+
+**What it checks:**
+- `ruff check` — lint
+- `ruff format --check` — formatting
+- `pytest` — test suite
+
+Configuration lives in `.github/workflows/ci.yml`.
 
 ---
 
