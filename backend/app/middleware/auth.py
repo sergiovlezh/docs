@@ -1,6 +1,5 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import NoResultFound
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.database import SessionLocal
@@ -27,13 +26,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
 
         with SessionLocal() as session:
-            try:
-                user = AuthService(session).get_user_by_token(token)
-                request.state.user = user
-            except NoResultFound:
+            user = AuthService(session).get_authenticated_user(token)
+
+            if user is None:
                 return JSONResponse(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"detail": "Invalid or expired token"},
                 )
+
+            request.state.user = user
 
         return await call_next(request)
