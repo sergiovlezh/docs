@@ -8,7 +8,7 @@ from sqlalchemy import Engine, StaticPool, create_engine
 from sqlalchemy.orm import Session
 
 from alembic import command
-from app.database import Base, get_db
+from app.core.database import Base, get_db
 from app.main import app
 
 TEST_DATABASE_URL = "sqlite:///:memory:"

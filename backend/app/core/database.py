@@ -3,10 +3,9 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-from app.config import settings
+from app.core.config import settings
 
-engine = create_engine(settings.database_url, echo=settings.debug)
-
+engine = create_engine(settings.DATABASE_URL, echo=settings.DEBUG)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
