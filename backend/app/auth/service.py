@@ -65,7 +65,8 @@ class UserService:
         """
         user = self.get_by_email(email)
         hashed = user.hashed_password if user is not None else _DUMMY_HASH
-        if user is None or not verify_password(password, hashed):
+        is_valid = verify_password(password, hashed)
+        if user is None or not is_valid:
             raise InvalidCredentialsError
 
         return user
