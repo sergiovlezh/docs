@@ -28,11 +28,6 @@ def register(body: RegisterRequest, svc: UserSvc) -> UserResponse:
             status_code=status.HTTP_409_CONFLICT,
             detail="Email already registered",
         ) from None
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while creating the user",
-        ) from None
 
 
 @router.post("/login", response_model=TokenResponse)
