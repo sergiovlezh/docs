@@ -1,3 +1,4 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.exceptions import DuplicateEmailError, InvalidCredentialsError
@@ -45,7 +46,11 @@ class UserService:
             hashed_password=hash_password(password),
         )
         self.db.add(user)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise DuplicateEmailError(email) from None
         self.db.refresh(user)
 
         return user
