@@ -10,8 +10,11 @@ class Settings(BaseSettings):
     )
 
     DATABASE_URL: str
+    SECRET_KEY: str
 
     DEBUG: bool = False
+    TOKEN_EXPIRE_HOURS: int = 12
+    MIN_PASSWORD_LENGTH: int = 8
 
 
 settings = Settings()
