@@ -12,6 +12,7 @@ jobs:
 
     env:
       DATABASE_URL: sqlite:///./test.db
+      SECRET_KEY: ci-test-secret-key-not-for-production
 
     steps:
       - uses: actions/checkout@v4
