@@ -1,0 +1,65 @@
+## ADR-002 - File Storage Strategy
+
+**Date:** 2026-03-31
+**Status:** Accepted
+
+### Context
+
+The app stores user-uploaded files (document pages, attachments). It runs initially as a
+local Docker instance. Files need to be written, read, and deleted reliably, and the
+storage layer may be replaced with a remote object store (S3, GCS) in a future version.
+
+Key constraints:
+- Must work inside a Docker container from day one with no external dependencies
+- Business concepts (document, original filename) must stay independent of storage details
+- Swapping backends later must not require changes to upload/download handlers
+- Filenames on disk must not collide and must be filesystem-safe
+
+### Decision
+
+Use the **local filesystem mounted via a Docker volume**, behind a **`StorageBackend` Protocol**,
+for the initial version.
+
+Files are stored using a UUID-based path:
+
+```
+/storage/uploads/{user_id}/{document_id}/{file_id}.{ext}
+```
+
+- `STORAGE_PATH` env var controls the mount point; defaults to `/storage`
+- `user_id` prefix partitions data per user and maps to future S3 key prefix policies
+- Files are named `{uuid}.{ext}` - UUID for uniqueness, extension retained for debuggability
+- The relative path is the **storage key**, persisted in `DocumentFile.storage_key`
+- The original filename supplied by the uploader is stored in `DocumentFile.original_filename`
+  in the database - it is never derived from the filesystem
+- `Document.title` defaults to `Path(original_filename).stem` of the first uploaded file
+  and is user-editable
+- A `StorageBackend` Protocol defines `save`, `load`, `delete`, and `exists`
+- `LocalFileStorage` implements the Protocol; `save` writes atomically via temp file + rename
+- A FastAPI `get_storage()` dependency returns the active backend - all handlers are
+  backend-agnostic
+
+### Consequences
+
+- No external infrastructure needed for initial version - a single Docker volume is sufficient
+- Swapping to S3 or GCS requires only a new `StorageBackend` implementation and an env-var
+  toggle; no handler changes
+- Horizontal scaling before a remote store is introduced requires a shared volume (NFS, EFS)
+  - acceptable for a local single-instance app at this stage
+- Callers must not assume durability until `save()` returns (atomic write contract)
+
+### Alternatives considered
+
+| Option | Reason rejected |
+|--------|----------------|
+| Store under original filename | Collisions, encoding issues, leaks user data in paths |
+| Single flat directory | No partitioning; impractical at scale |
+| S3 from day one | Unnecessary infra complexity before the product is proven |
+| SQLite BLOB storage | Not viable for large files; prevents streaming |
+
+### Future direction
+
+- **Remote object store (S3 / GCS)** - implement `S3StorageBackend`, toggle via env var;
+  no upload/download handler changes required
+- **Per-user storage quotas** - enforced at the `save()` boundary in the Protocol
+- **Virus scanning / MIME validation** - can be added as a decorator over `StorageBackend`
