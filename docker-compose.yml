@@ -3,7 +3,8 @@ services:
     build:
       context: ./backend
       target: prod
-    env_file: .env
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
     ports:
       - "8000:8000"
     volumes:
