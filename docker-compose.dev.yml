@@ -1,0 +1,16 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    env_file: .env.local
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - db-data:/data/db
+      - file-storage:/data/files
+
+volumes:
+  db-data:
+  file-storage:
