@@ -1,0 +1,17 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: prod
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "8000:8000"
+    volumes:
+      - db-data:/data/db
+      - file-storage:/data/files
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  file-storage:
